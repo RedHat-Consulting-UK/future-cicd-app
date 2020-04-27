@@ -1,0 +1,5 @@
+= future-cicd-app
+
+Original sources:
+- https://github.com/redhat-cop/container-pipelines/tree/master/basic-spring-boot
+- https://github.com/redhat-cop/spring-rest
