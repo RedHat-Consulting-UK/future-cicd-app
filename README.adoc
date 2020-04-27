@@ -1,5 +1,13 @@
 = future-cicd-app
 
-Original sources:
+== install
+
+- helm template --dependency-update redhat-consulting-uk-helm3/app-of-apps --values my-project-app.yaml | oc apply -n my-project -f -
+- ./start-build.sh
+
+== Original sources:
+
 - https://github.com/redhat-cop/container-pipelines/tree/master/basic-spring-boot
 - https://github.com/redhat-cop/spring-rest
+
+

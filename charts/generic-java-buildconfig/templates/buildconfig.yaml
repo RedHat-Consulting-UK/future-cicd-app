@@ -1,0 +1,31 @@
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  labels:
+    application: {{ .Values.application_name | quote }}
+    template: generic-java-buildconfig
+  name: {{ .Values.application_name | quote }}
+  namespace: {{ .Values.namespace | quote }}
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: {{ .Values.application_name }}:latest
+  source:
+    binary: {}
+    type: Binary
+  strategy:
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        name: {{ .Values.image_stream_tag_name }}
+        namespace: {{ .Values.image_stream_namespace }}
+    type: Source
+  triggers:
+    - type: ImageChange
+      imageChange:
+        from:
+          kind: ImageStreamTag
+          name: {{ .Values.image_stream_tag_name }}
+          namespace: {{ .Values.image_stream_namespace }}

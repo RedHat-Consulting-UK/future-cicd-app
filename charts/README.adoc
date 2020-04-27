@@ -1,0 +1,4 @@
+= helm commands
+
+- helm template generic-java-buildconfig
+- helm template basic-sprint-boot

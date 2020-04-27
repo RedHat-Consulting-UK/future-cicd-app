@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    description: The web server's http port.
+  labels:
+    app: {{ .Values.application_name | quote }}
+    template: basic-spring-boot
+  name: {{ .Values.application_name | quote }}
+  namespace: {{ .Values.namespace | quote }}
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+  selector:
+    deploymentConfig: {{ .Values.application_name | quote }}

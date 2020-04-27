@@ -1,0 +1,15 @@
+apiVersion: v2
+name: basic-sprint-boot
+description: A Helm chart to deploy basic-sprint-boot
+type: application
+
+maintainers:
+  - name: garethahealy
+
+# This is the chart version. This version number should be incremented each time you make changes
+# to the chart and its templates, including the app version.
+version: 0.0.1
+
+# This is the version number of the application being deployed. This version number should be
+# incremented each time you make changes to the application.
+appVersion: 0.1.0

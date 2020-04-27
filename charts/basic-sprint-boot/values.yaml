@@ -1,0 +1,6 @@
+namespace: my-project
+application_name: basic-spring
+readiness_path: /
+readiness_response: Hello, World
+jws_admin_username: admin
+jws_admin_password: admin123

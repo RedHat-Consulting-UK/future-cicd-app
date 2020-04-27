@@ -1,0 +1,14 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    description: Route for application's http service.
+  labels:
+    app: {{ .Values.application_name | quote }}
+    template: basic-spring-boot
+  name: {{ .Values.application_name | quote }}
+  namespace: {{ .Values.namespace | quote }}
+spec:
+  to:
+    kind: Service
+    name: {{ .Values.application_name | quote }}

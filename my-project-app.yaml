@@ -1,0 +1,20 @@
+project_namespace: &proj_namespace my-project
+
+applications:
+  - name: basic-sprint-boot
+    destination: *proj_namespace
+    enabled: true
+    source: https://github.com/RedHat-Consulting-UK/future-cicd-app.git
+    source_path: charts/basic-sprint-boot
+    source_ref: master
+    helm_values:
+      - values.yaml
+  - name: generic-java-buildconfig
+    destination: *proj_namespace
+    enabled: true
+    source: https://github.com/RedHat-Consulting-UK/future-cicd-app.git
+    source_path: charts/generic-java-buildconfig
+    source_ref: master
+    sync_policy_automated: true
+    helm_values:
+      - values.yaml

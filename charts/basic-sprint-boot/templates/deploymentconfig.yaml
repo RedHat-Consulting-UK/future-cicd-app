@@ -1,0 +1,44 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  labels:
+    app: {{ .Values.application_name | quote }}
+    template: basic-spring-boot
+  name: {{ .Values.application_name | quote }}
+  namespace: {{ .Values.namespace | quote }}
+spec:
+  replicas: 1
+  selector:
+    deploymentConfig: {{ .Values.application_name | quote }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.application_name | quote }}
+        deploymentConfig: {{ .Values.application_name | quote }}
+      name: {{ .Values.application_name | quote }}
+    spec:
+      containers:
+      - env:
+        - name: JWS_ADMIN_USERNAME
+          value: {{ .Values.jws_admin_username }}
+        - name: JWS_ADMIN_PASSWORD
+          value: {{ .Values.jws_admin_password }}
+        image: image-registry.openshift-image-registry.svc:5000/{{ .Values.namespace }}/{{ .Values.application_name }}:latest
+        imagePullPolicy: Always
+        name: {{ .Values.application_name }}
+        ports:
+        - containerPort: 8778
+          name: jolokia
+          protocol: TCP
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        readinessProbe:
+          exec:
+            command:
+            - /bin/bash
+            - -c
+            - curl -L -s http://localhost:8080{{ .Values.readiness_path }} | grep -iq "{{ .Values.readiness_response }}"
+      terminationGracePeriodSeconds: 60
