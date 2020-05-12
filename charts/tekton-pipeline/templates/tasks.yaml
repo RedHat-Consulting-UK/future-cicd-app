@@ -1,0 +1,136 @@
+---
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: mvn
+spec:
+  inputs:
+    params:
+      - name: GOALS
+        description: The Maven goals to run
+        type: array
+        default:
+          - "package"
+    resources:
+      - name: source
+        targetPath: /
+        type: git
+  steps:
+    - name: mvn-settings
+      image: gcr.io/cloud-builders/mvn
+      workingdir: /.m2
+      command:
+        - '/bin/sh'
+        - '-c'
+      args:
+        - |-
+          cat > /.m2/settings.xml <<EOF
+          <settings>
+            <mirrors>
+              <mirror>
+                <id>bucketrepo</id>
+                <name>bucketrepo-mirror</name>
+                <url>http://bucketrepo.argocd.svc.cluster.local:8080/bucketrepo/</url>
+                <mirrorOf>*</mirrorOf>
+              </mirror>
+            </mirrors>
+          </settings>
+          EOF
+      volumeMounts:
+        - name: m2-repository
+          mountPath: /.m2
+    - name: mvn-goals
+      image: gcr.io/cloud-builders/mvn
+      command:
+        - /usr/bin/mvn
+      args:
+        - "$(inputs.params.GOALS)"
+      volumeMounts:
+        - name: m2-repository
+          mountPath: /.m2
+  volumes:
+    - name: m2-repository
+      emptyDir: {}
+---
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: s2i-generate
+spec:
+  inputs:
+    params:
+      - default: "true"
+        description: Verify the TLS on the registry endpoint (for push/pull to a non-TLS
+          registry)
+        name: TLSVERIFY
+        type: string
+    resources:
+      - name: source
+        type: git
+  outputs:
+    resources:
+      - name: image
+        type: image
+  steps:
+    - command:
+        - s2i
+        - generate
+        - registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift
+        - /gen-source/Dockerfile.gen
+      image: quay.io/openshift-pipeline/s2i:v0.11
+      name: generate
+      resources: {}
+      volumeMounts:
+        - mountPath: /gen-source
+          name: gen-source
+      workingDir: /workspace/source
+    - command:
+        - cat
+        - /gen-source/Dockerfile.gen
+      image: quay.io/openshift-pipeline/s2i
+      name: generate-cat
+      resources: {}
+      volumeMounts:
+        - mountPath: /gen-source
+          name: gen-source
+      workingDir: /workspace/source
+    - command:
+        - buildah
+        - bud
+        - --tls-verify=$(inputs.params.TLSVERIFY)
+        - --layers
+        - -f
+        - /gen-source/Dockerfile.gen
+        - -t
+        - $(outputs.resources.image.url)
+        - .
+      image: quay.io/buildah/stable
+      name: build
+      resources: {}
+      securityContext:
+        privileged: true
+      volumeMounts:
+        - mountPath: /var/lib/containers
+          name: varlibcontainers
+        - mountPath: /gen-source
+          name: gen-source
+      workingDir: /gen-source
+    - command:
+        - buildah
+        - push
+        - --tls-verify=$(inputs.params.TLSVERIFY)
+        - $(outputs.resources.image.url)
+        - docker://$(outputs.resources.image.url)
+      image: quay.io/buildah/stable
+      name: push
+      resources: {}
+      securityContext:
+        privileged: true
+      volumeMounts:
+        - mountPath: /var/lib/containers
+          name: varlibcontainers
+  volumes:
+    - emptyDir: {}
+      name: varlibcontainers
+    - emptyDir: {}
+      name: gen-source

@@ -6,7 +6,6 @@ metadata:
     application: {{ .Values.application_name | quote }}
     template: generic-java-buildconfig
   name: {{ .Values.application_name | quote }}
-  namespace: {{ .Values.namespace | quote }}
 spec:
   output:
     to:

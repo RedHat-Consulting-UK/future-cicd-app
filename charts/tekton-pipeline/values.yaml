@@ -1,0 +1,7 @@
+namespace: bob
+application_name: basic-spring
+application_source_ref: master
+application_source_repo: https://github.com/redhat-cop/spring-rest.git
+context_dir: basic-spring-boot
+image_stream_namespace: openshift
+image_stream_tag_name: redhat-openjdk18-openshift:1.5

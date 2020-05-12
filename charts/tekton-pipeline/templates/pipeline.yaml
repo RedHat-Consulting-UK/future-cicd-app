@@ -1,0 +1,33 @@
+---
+apiVersion: tekton.dev/v1alpha1
+kind: Pipeline
+metadata:
+  name: {{ .Values.application_name }}-pipeline
+spec:
+  resources:
+    - name: {{ .Values.application_name }}-git
+      type: git
+    - name: {{ .Values.application_name }}-image
+      type: image
+  tasks:
+    - name: source-build
+      taskRef:
+        kind: Task
+        name: mvn
+      resources:
+        inputs:
+          - name: source
+            resource: {{ .Values.application_name }}-git
+    - name: image-build
+      taskRef:
+        kind: Task
+        name: s2i-generate
+      resources:
+        inputs:
+          - name: source
+            resource: {{ .Values.application_name }}-git
+        outputs:
+          - name: image
+            resource: {{ .Values.application_name }}-image
+      runAfter:
+        - source-build

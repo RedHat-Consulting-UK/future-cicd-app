@@ -7,7 +7,6 @@ metadata:
     app: {{ .Values.application_name | quote }}
     template: basic-spring-boot
   name: {{ .Values.application_name | quote }}
-  namespace: {{ .Values.namespace | quote }}
 spec:
   ports:
   - port: 8080
